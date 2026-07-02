@@ -1,0 +1,48 @@
+{
+  "nav": {
+    "home": "Beranda",
+    "about": "Tentang Saya",
+    "projects": "Proyek",
+    "gallery": "Galeri Karya",
+    "contact": "Kontak"
+  },
+  "hero": {
+    "title": "Portofolio Interaktif Modern",
+    "subtitle": "Di Mana Logika Bertemu dengan Seni.",
+    "cta": "Lihat Proyek Saya",
+    "docs": "Dokumentasi"
+  },
+  "about": {
+    "title": "Tentang Saya",
+    "description": "Saya adalah seorang pengembang perangkat lunak yang berfokus pada pembuatan antarmuka web interaktif yang modern, estetik, dan berkinerja tinggi."
+  },
+  "projects": {
+    "title": "Proyek Unggulan",
+    "view_more": "Selengkapnya"
+  },
+  "gallery": {
+    "title": "Galeri Karya",
+    "subtitle": "Kumpulan hasil ilustrasi digital, wallpaper, dan stiker bertema fiksi ilmiah dan taktis.",
+    "tab_all": "Semua",
+    "tab_wallpaper": "Wallpaper",
+    "tab_stickers": "Stiker",
+    "tab_bookmarks": "Ditandai",
+    "download": "Unduh Berkas",
+    "download_desktop": "Desktop (1920×1080)",
+    "download_mobile": "Mobile (1080×1920)",
+    "quick_download": "Unduh Cepat",
+    "view": "Lihat",
+    "close": "Tutup",
+    "specs": "Spesifikasi",
+    "dimension": "Dimensi",
+    "format": "Format",
+    "style": "Gaya Visual"
+  },
+  "contact": {
+    "title": "Hubungi Saya",
+    "name": "Nama Anda",
+    "email": "Alamat Email",
+    "message": "Pesan",
+    "send": "Kirim Pesan"
+  }
+}

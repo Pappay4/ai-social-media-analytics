@@ -1,0 +1,48 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About Me",
+    "projects": "Projects",
+    "gallery": "Gallery",
+    "contact": "Contact"
+  },
+  "hero": {
+    "title": "Modern Interactive Portfolio",
+    "subtitle": "Where Logic Meets Art.",
+    "cta": "View My Projects",
+    "docs": "Documentation"
+  },
+  "about": {
+    "title": "About Me",
+    "description": "I am a software developer focused on building modern, aesthetic, and high-performance interactive web interfaces."
+  },
+  "projects": {
+    "title": "Featured Projects",
+    "view_more": "View More"
+  },
+  "gallery": {
+    "title": "Creative Gallery",
+    "subtitle": "Collection of digital illustrations, wallpapers, and stickers with a sci-fi and tactical theme.",
+    "tab_all": "All",
+    "tab_wallpaper": "Wallpaper",
+    "tab_stickers": "Stickers",
+    "tab_bookmarks": "Bookmarks",
+    "download": "Download File",
+    "download_desktop": "Desktop (1920×1080)",
+    "download_mobile": "Mobile (1080×1920)",
+    "quick_download": "Quick Download",
+    "view": "View",
+    "close": "Close",
+    "specs": "Specifications",
+    "dimension": "Dimensions",
+    "format": "Format",
+    "style": "Visual Style"
+  },
+  "contact": {
+    "title": "Contact Me",
+    "name": "Your Name",
+    "email": "Email Address",
+    "message": "Message",
+    "send": "Send Message"
+  }
+}

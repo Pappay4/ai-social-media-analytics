@@ -1,11 +1,3 @@
-// =================================================================
-// AI Social Media Analytics - Database Schema (Issue #5)
-// =================================================================
-// Skema ini mendukung SQLite untuk pengembangan lokal.
-// Untuk produksi, ganti provider ke "postgresql" dan aktifkan
-// anotasi @db.* yang sesuai.
-// =================================================================
-
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
@@ -15,96 +7,48 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// =================================================================
-// MODEL: User
-// Tabel utama pengguna aplikasi.
-// Relasi: 1 User → N SocialAccount, 1 User → N AIInteraction
-// =================================================================
 model User {
   id             String          @id @default(uuid())
   name           String
   email          String          @unique
-  passwordHash   String          @default("")
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
   socialAccounts SocialAccount[]
-  aiInteractions AIInteraction[]
-}
-
-// =================================================================
-// MODEL: SocialAccount
-// Menyimpan kredensial akun media sosial yang terhubung.
-// platform: "INSTAGRAM" | "TIKTOK" | "LINKEDIN" | "TWITTER"
-// Relasi: 1 SocialAccount → N Post, 1 SocialAccount → N Analytics
-// =================================================================
-model SocialAccount {
-  id             String      @id @default(uuid())
-  userId         String
-  platform       String      // INSTAGRAM, TIKTOK, LINKEDIN, TWITTER
-  platformUserId String      @default("")
-  username       String
-  accessToken    String      @default("")
-  profilePicUrl  String?
-  createdAt      DateTime    @default(now())
-  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   posts          Post[]
   analytics      Analytics[]
+  createdAt      DateTime        @default(now())
 }
 
-// =================================================================
-// MODEL: Post
-// Menyimpan konten draf/terjadwal/terpublikasi.
-// status: "DRAFT" | "SCHEDULED" | "PUBLISHED"
-// hashtags: Disimpan sebagai JSON string (SQLite tidak mendukung array)
-// =================================================================
+model SocialAccount {
+  id        String   @id @default(uuid())
+  platform  String   // "Instagram" | "LinkedIn" | "Twitter" | "TikTok"
+  username  String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
 model Post {
-  id              String      @id @default(uuid())
-  socialAccountId String
-  hook            String?
-  caption         String
-  callToAction    String?
-  hashtags        String      @default("[]") // JSON array string, e.g. '["#tag1","#tag2"]'
-  visualDirection String?
-  status          String      @default("DRAFT") // DRAFT, SCHEDULED, PUBLISHED
-  scheduledAt     DateTime?
-  publishedAt     DateTime?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  socialAccount   SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
-  analytics       Analytics[]
+  id          String    @id @default(uuid())
+  title       String
+  content     String
+  status      String    // "DRAFT" | "SCHEDULED" | "PUBLISHED"
+  platform    String    // "Instagram" | "LinkedIn" | "Twitter" | "TikTok"
+  scheduledAt DateTime?
+  publishedAt DateTime?
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
-// =================================================================
-// MODEL: Analytics
-// Menyimpan metrik performa historis (time-series).
-// Bisa terkait ke akun (account-level) atau ke post (post-level).
-// =================================================================
 model Analytics {
-  id              Int           @id @default(autoincrement())
-  socialAccountId String
-  postId          String?
-  recordedAt      DateTime
-  followersCount  Int           @default(0)
-  engagementRate  Float         @default(0)
-  viewsCount      Int           @default(0)
-  likesCount      Int           @default(0)
-  sharesCount     Int           @default(0)
-  socialAccount   SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
-  post            Post?         @relation(fields: [postId], references: [id], onDelete: SetNull)
-}
-
-// =================================================================
-// MODEL: AIInteraction
-// Log audit setiap interaksi dengan AI Agent.
-// Menyimpan prompt & response sebagai JSON string.
-// actionType: "generate_content" | "analyze_metrics" | "sentiment_analysis"
-// =================================================================
-model AIInteraction {
-  id              String   @id @default(uuid())
-  userId          String
-  actionType      String   // generate_content, analyze_metrics, sentiment_analysis
-  promptPayload   String   // JSON string dari input pengguna
-  responsePayload String   // JSON string dari respons AI
-  createdAt       DateTime @default(now())
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             String   @id @default(uuid())
+  date           DateTime
+  followersCount Int
+  engagementRate Float
+  impressions    Int
+  reach          Int
+  platform       String   // "Instagram" | "LinkedIn" | "Twitter" | "TikTok" | "ALL"
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
 }

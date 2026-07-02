@@ -1,0 +1,54 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id             String          @id @default(uuid())
+  name           String
+  email          String          @unique
+  socialAccounts SocialAccount[]
+  posts          Post[]
+  analytics      Analytics[]
+  createdAt      DateTime        @default(now())
+}
+
+model SocialAccount {
+  id        String   @id @default(uuid())
+  platform  String   // "Instagram" | "LinkedIn" | "Twitter" | "TikTok"
+  username  String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Post {
+  id          String    @id @default(uuid())
+  title       String
+  content     String
+  status      String    // "DRAFT" | "SCHEDULED" | "PUBLISHED"
+  platform    String    // "Instagram" | "LinkedIn" | "Twitter" | "TikTok"
+  scheduledAt DateTime?
+  publishedAt DateTime?
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Analytics {
+  id             String   @id @default(uuid())
+  date           DateTime
+  followersCount Int
+  engagementRate Float
+  impressions    Int
+  reach          Int
+  platform       String   // "Instagram" | "LinkedIn" | "Twitter" | "TikTok" | "ALL"
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+}

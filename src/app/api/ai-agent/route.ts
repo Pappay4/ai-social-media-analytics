@@ -10,6 +10,7 @@
 
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const prisma = new PrismaClient();
 
@@ -152,29 +153,18 @@ Input Pengguna Yang Harus Diproses:
       return NextResponse.json(mockResponse);
     }
 
-    // 3. Panggil Gemini API
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: userPrompt }] }],
-          systemInstruction: { parts: [{ text: systemInstruction }] },
-          generationConfig: { responseMimeType: "application/json" },
-        }),
-      }
-    );
+    // 3. Panggil Gemini API menggunakan SDK
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash",
+      systemInstruction: systemInstruction,
+      generationConfig: {
+        responseMimeType: "application/json",
+      },
+    });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Gemini API Error: Status ${response.status} - ${errorText}`);
-    }
-
-    const resJson = await response.json();
-    const responseText = resJson.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const result = await model.generateContent(userPrompt);
+    const responseText = result.response.text();
 
     try {
       const parsed = JSON.parse(responseText.trim());

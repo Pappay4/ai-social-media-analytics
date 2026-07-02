@@ -3,15 +3,37 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// Ambil semua posts
+// Ambil semua posts (dengan info social account)
 export async function GET() {
   try {
     const posts = await prisma.post.findMany({
       orderBy: {
         createdAt: "desc",
       },
+      include: {
+        socialAccount: {
+          select: {
+            platform: true,
+            username: true,
+          },
+        },
+      },
     });
-    return NextResponse.json(posts);
+
+    // Parse hashtags dari JSON string dan sertakan platform dari socialAccount
+    const enrichedPosts = posts.map((post) => ({
+      ...post,
+      platform: post.socialAccount.platform,
+      hashtags: (() => {
+        try {
+          return JSON.parse(post.hashtags);
+        } catch {
+          return [];
+        }
+      })(),
+    }));
+
+    return NextResponse.json(enrichedPosts);
   } catch (error: any) {
     console.error("Gagal mengambil data posts:", error);
     return NextResponse.json({ error: "Gagal mengambil data posts" }, { status: 500 });
@@ -22,32 +44,53 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    const { title, content, status, platform, scheduledAt, publishedAt } = data;
+    const { caption, hook, callToAction, hashtags, visualDirection, status, platform, scheduledAt, publishedAt } = data;
 
-    if (!title || !content || !status || !platform) {
-      return NextResponse.json({ error: "Parameter wajib tidak lengkap" }, { status: 400 });
+    if (!caption || !status || !platform) {
+      return NextResponse.json({ error: "Parameter wajib tidak lengkap (caption, status, platform)" }, { status: 400 });
     }
 
-    // Ambil user pertama sebagai default
+    // Cari social account yang sesuai platform, atau buat user & account default
     let defaultUser = await prisma.user.findFirst();
     if (!defaultUser) {
       defaultUser = await prisma.user.create({
         data: {
           name: "Alex Marketer",
           email: "alex@socialpilot.ai",
+          passwordHash: "",
+        },
+      });
+    }
+
+    let socialAccount = await prisma.socialAccount.findFirst({
+      where: {
+        userId: defaultUser.id,
+        platform: platform.toUpperCase(),
+      },
+    });
+
+    if (!socialAccount) {
+      socialAccount = await prisma.socialAccount.create({
+        data: {
+          userId: defaultUser.id,
+          platform: platform.toUpperCase(),
+          username: `@user_${platform.toLowerCase()}`,
+          accessToken: "",
         },
       });
     }
 
     const newPost = await prisma.post.create({
       data: {
-        title,
-        content,
-        status,
-        platform,
+        socialAccountId: socialAccount.id,
+        caption,
+        hook: hook || null,
+        callToAction: callToAction || null,
+        hashtags: Array.isArray(hashtags) ? JSON.stringify(hashtags) : (hashtags || "[]"),
+        visualDirection: visualDirection || null,
+        status: status.toUpperCase(),
         scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
         publishedAt: publishedAt ? new Date(publishedAt) : null,
-        userId: defaultUser.id,
       },
     });
 

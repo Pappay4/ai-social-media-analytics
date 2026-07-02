@@ -149,6 +149,10 @@ Input Pengguna Yang Harus Diproses:
       console.warn("GEMINI_API_KEY tidak ditemukan. Menjalankan fallback simulator.");
       await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulasi delay
       const mockResponse = generateMockResponse(action_type, data_payload);
+
+      // Log AI interaction ke database (audit trail)
+      await logAIInteraction(action_type, data_payload, mockResponse);
+
       return NextResponse.json(mockResponse);
     }
 
@@ -178,12 +182,16 @@ Input Pengguna Yang Harus Diproses:
 
     try {
       const parsed = JSON.parse(responseText.trim());
+      // Log AI interaction ke database (audit trail)
+      await logAIInteraction(action_type, data_payload, parsed);
       return NextResponse.json(parsed);
     } catch (parseError) {
       const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/) || responseText.match(/```\s*([\s\S]*?)\s*```/);
       if (jsonMatch && jsonMatch[1]) {
         try {
           const parsedClean = JSON.parse(jsonMatch[1].trim());
+          // Log AI interaction ke database (audit trail)
+          await logAIInteraction(action_type, data_payload, parsedClean);
           return NextResponse.json(parsedClean);
         } catch (e) {}
       }
@@ -198,6 +206,28 @@ Input Pengguna Yang Harus Diproses:
       { status: "error", message: error.message || "Internal Server Error" },
       { status: 500 }
     );
+  }
+}
+
+/**
+ * Log setiap interaksi AI ke tabel AIInteraction untuk audit trail.
+ */
+async function logAIInteraction(actionType: string, promptPayload: any, responsePayload: any) {
+  try {
+    const defaultUser = await prisma.user.findFirst();
+    if (defaultUser) {
+      await prisma.aIInteraction.create({
+        data: {
+          userId: defaultUser.id,
+          actionType,
+          promptPayload: JSON.stringify(promptPayload),
+          responsePayload: JSON.stringify(responsePayload),
+        },
+      });
+    }
+  } catch (logError) {
+    console.error("Gagal menyimpan log AI Interaction:", logError);
+    // Jangan throw error logging, biarkan response tetap dikirim ke client
   }
 }
 
